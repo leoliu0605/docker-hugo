@@ -3,6 +3,9 @@ name: Check Hugo Release & Publish to Docker Hub
 on:
   schedule:
     - cron: '0 0 * * *' # 每天檢查一次
+  push:
+    branches:
+      - main
 
 jobs:
   check-and-publish:
