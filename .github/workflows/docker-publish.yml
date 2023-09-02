@@ -1,0 +1,43 @@
+name: Check Hugo Release & Publish to Docker Hub
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # 每天檢查一次
+
+jobs:
+  check-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install jq
+      run: sudo apt-get install jq
+
+    - name: Check for Hugo new release
+      id: check-release
+      run: |
+        ver=$(curl --silent "https://api.github.com/repos/gohugoio/hugo/releases/latest" | jq -r .tag_name)
+        echo "HUGO_VERSION=$ver" >> $GITHUB_ENV
+
+    - name: Checkout code
+      if: env.HUGO_VERSION
+      uses: actions/checkout@v2
+
+    - name: Login to Docker Hub
+      if: env.HUGO_VERSION
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push
+      if: env.HUGO_VERSION
+      run: |
+        username=${{ secrets.DOCKERHUB_USERNAME }}
+        ver=${HUGO_VERSION#v}
+        builder=builder
+        if ! docker buildx ls | grep -q $builder; then
+            docker buildx create --name $builder
+        fi
+        docker buildx use $builder
+        docker buildx inspect --bootstrap
+        docker buildx build --platform=linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7 --push -t $username/hugo:$ver-ext-debian -t $username/hugo:latest .
