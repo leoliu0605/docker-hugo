@@ -8,3 +8,8 @@ Use `docker pull jafee201153/hugo:latest` to get the latest image.
 Start from `v0.115.4`, and you can get the previous version [here](https://hub.docker.com/r/klakegg/hugo)
 
 Usually spend 2.5 hours to finish the whole process.
+
+## TODO
+
+- [ ] Add [Overview](https://hub.docker.com/r/jafee201153/hugo) to this Docker Hub repo.
+- [ ] Organize this README.md.
