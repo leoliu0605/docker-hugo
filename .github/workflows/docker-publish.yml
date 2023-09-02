@@ -22,7 +22,7 @@ jobs:
         run: |
           ver=$(curl --silent "https://api.github.com/repos/gohugoio/hugo/releases/latest" | jq -r .tag_name)
           echo "Latest Hugo version: $ver"
-          echo "HUGO_VERSION=$ver" >> $GITHUB_ENVIRONMENT_PATH
+          echo "HUGO_VERSION=$ver" >> $GITHUB_ENV
 
       - name: Checkout code
         if: env.HUGO_VERSION
