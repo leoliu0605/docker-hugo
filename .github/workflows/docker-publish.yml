@@ -34,8 +34,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-        run: |
-          echo "Logged in to Docker Hub successfully."
+      - run: echo "Logged in to Docker Hub successfully."
 
       - name: Build and push
         if: env.HUGO_VERSION
