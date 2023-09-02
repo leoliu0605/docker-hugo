@@ -22,7 +22,7 @@ jobs:
         run: |
           ver=$(curl --silent "https://api.github.com/repos/gohugoio/hugo/releases/latest" | jq -r .tag_name)
           echo "Latest Hugo version: $ver"
-          echo "HUGO_VERSION=$ver" >> $GITHUB_ENV
+          echo "HUGO_VERSION=$ver" >> $GITHUB_ENVIRONMENT_PATH
 
       - name: Checkout code
         if: env.HUGO_VERSION
@@ -30,11 +30,10 @@ jobs:
 
       - name: Login to Docker Hub
         if: env.HUGO_VERSION
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - run: echo "Logged in to Docker Hub successfully."
 
       - name: Build and push
         if: env.HUGO_VERSION
