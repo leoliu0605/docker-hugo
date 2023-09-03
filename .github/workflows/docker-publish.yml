@@ -21,12 +21,14 @@ jobs:
         id: fetch-versions
         run: |
           tags=$(curl --silent "https://api.github.com/repos/gohugoio/hugo/tags" | jq -r '.[].name' | sort -V | tr '\n' ';')
+          echo "Fetched Hugo versions: $tags"
           echo "::set-output name=hugo_versions::$tags"
 
       - name: Check if versions exist on Docker Hub
         id: check-versions
         run: |
           existing_tags=$(curl -s "https://registry.hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/hugo/tags/" | jq -r '.results[].name')
+          echo "Existing tags on Docker Hub: $existing_tags"
           versions_to_build=""
           IFS=';' read -ra ADDR <<< "${{ steps.fetch-versions.outputs.hugo_versions }}"
           for tag in "${ADDR[@]}"; do
@@ -34,11 +36,14 @@ jobs:
               versions_to_build="$versions_to_build;$tag"
             fi
           done
+          echo "Versions to build: $versions_to_build"
           echo "VERSIONS_TO_BUILD=$versions_to_build" >> $GITHUB_ENV
 
       - name: Checkout code
         if: env.VERSIONS_TO_BUILD
         uses: actions/checkout@v2
+        run: |
+          echo "Checking out code..."
 
       - name: Login to Docker Hub
         if: env.VERSIONS_TO_BUILD
@@ -46,11 +51,14 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        run: |
+          echo "Logging in to Docker Hub..."
 
       - name: Build and push
         if: env.VERSIONS_TO_BUILD
         run: |
           username=${{ secrets.DOCKERHUB_USERNAME }}
+          echo "Docker Hub username: $username"
           builder=builder
           if ! docker buildx ls | grep -q $builder; then
               docker buildx create --name $builder
