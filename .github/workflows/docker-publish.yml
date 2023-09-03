@@ -63,5 +63,5 @@ jobs:
           docker buildx use $builder
           echo "Using builder: $builder"
           docker buildx inspect --bootstrap
-          docker buildx build --platform=linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7 --push -t $username/hugo:$ver-ext-debian -t $username/hugo:latest .
+          docker buildx build --build-arg HUGO_VERSION=$HUGO_VERSION --platform=linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7 --push -t $username/hugo:$ver-ext-debian -t $username/hugo:latest .
           echo "Docker image built and pushed successfully."
