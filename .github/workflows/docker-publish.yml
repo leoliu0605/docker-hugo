@@ -20,7 +20,7 @@ jobs:
       - name: Fetch Hugo versions
         id: fetch-versions
         run: |
-          tags=$(curl --silent "https://api.github.com/repos/gohugoio/hugo/tags" | jq -r '.[].name' | sort -V | tr '\n' ',')
+          tags=$(curl --silent "https://api.github.com/repos/gohugoio/hugo/tags" | jq -r '.[].name' | sort -V | tr '\n' ';')
           echo "::set-output name=hugo_versions::$tags"
 
       - name: Check if versions exist on Docker Hub
@@ -28,10 +28,10 @@ jobs:
         run: |
           existing_tags=$(curl -s "https://registry.hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/hugo/tags/" | jq -r '.results[].name')
           versions_to_build=""
-          IFS=',' read -ra ADDR <<< "${{ steps.fetch-versions.outputs.hugo_versions }}"
+          IFS=';' read -ra ADDR <<< "${{ steps.fetch-versions.outputs.hugo_versions }}"
           for tag in "${ADDR[@]}"; do
             if [[ "$tag" > "v0.115.4" && ! "$existing_tags" =~ "${tag#v}-ext-debian" ]]; then
-              versions_to_build="$versions_to_build $tag"
+              versions_to_build="$versions_to_build;$tag"
             fi
           done
           echo "VERSIONS_TO_BUILD=$versions_to_build" >> $GITHUB_ENV
@@ -60,7 +60,8 @@ jobs:
           fi
           docker buildx use $builder
           docker buildx inspect --bootstrap
-          for tag in $VERSIONS_TO_BUILD; do
+          IFS=';' read -ra ADDR <<< "$VERSIONS_TO_BUILD"
+          for tag in "${ADDR[@]}"; do
             ver=${tag#v}
             echo "Building for version: $ver"
             echo docker buildx build --build-arg HUGO_VERSION=$tag --platform=linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7 --push -t $username/hugo:$ver-ext-debian -t $username/hugo:$ver .
