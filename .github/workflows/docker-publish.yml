@@ -42,8 +42,6 @@ jobs:
       - name: Checkout code
         if: env.VERSIONS_TO_BUILD
         uses: actions/checkout@v2
-        run: |
-          echo "Checking out code..."
 
       - name: Login to Docker Hub
         if: env.VERSIONS_TO_BUILD
@@ -51,8 +49,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-        run: |
-          echo "Logging in to Docker Hub..."
 
       - name: Build and push
         if: env.VERSIONS_TO_BUILD
