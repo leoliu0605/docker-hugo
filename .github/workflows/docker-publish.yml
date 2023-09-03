@@ -17,42 +17,38 @@ jobs:
           sudo apt-get install jq
           echo "jq installed successfully."
 
-      - name: Check for Hugo new release
-        id: check-release
+      - name: Fetch all Hugo versions
+        id: fetch-versions
         run: |
-          ver=$(curl --silent "https://api.github.com/repos/gohugoio/hugo/releases/latest" | jq -r .tag_name)
-          echo "Latest Hugo version: $ver"
-          echo "HUGO_VERSION=$ver" >> $GITHUB_ENV
+          tags=$(curl --silent "https://api.github.com/repos/gohugoio/hugo/tags" | jq -r '.[].name' | sort -V)
+          echo "HUGO_VERSIONS=$tags" >> $GITHUB_ENV
 
-      - name: Check if version exists on Docker Hub
+      - name: Check if versions exist on Docker Hub
         run: |
+          missing_versions=""
           tags=$(curl -s "https://registry.hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/hugo/tags/" | jq -r '.results[].name')
-          if echo "$tags" | grep -q "${HUGO_VERSION#v}-ext-debian"; then
-            echo "Version already exists on Docker Hub."
-            echo "DO_BUILD=false" >> $GITHUB_ENV
-          else
-            echo "Version does not exist on Docker Hub."
-            echo "DO_BUILD=true" >> $GITHUB_ENV
-          fi
+          for tag in $HUGO_VERSIONS; do
+            if [[ "$tag" > "v0.115.4" && ! "$tags" =~ "${tag#v}-ext-debian" ]]; then
+              missing_versions="$missing_versions $tag"
+            fi
+          done
+          echo "MISSING_VERSIONS=$missing_versions" >> $GITHUB_ENV
 
       - name: Checkout code
-        if: env.DO_BUILD == 'true'
+        if: env.MISSING_VERSIONS
         uses: actions/checkout@v2
 
       - name: Login to Docker Hub
-        if: env.DO_BUILD == 'true'
+        if: env.MISSING_VERSIONS
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Build and push
-        if: env.DO_BUILD == 'true'
+      - name: Build and push missing versions
+        if: env.MISSING_VERSIONS
         run: |
           username=${{ secrets.DOCKERHUB_USERNAME }}
-          echo "Docker Hub username: $username"
-          ver=${HUGO_VERSION#v}
-          echo "Stripped Hugo version: $ver"
           builder=builder
           if ! docker buildx ls | grep -q $builder; then
               docker buildx create --name $builder
@@ -61,7 +57,11 @@ jobs:
               echo "Builder $builder already exists."
           fi
           docker buildx use $builder
-          echo "Using builder: $builder"
           docker buildx inspect --bootstrap
-          docker buildx build --build-arg HUGO_VERSION=$HUGO_VERSION --platform=linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7 --push -t $username/hugo:$ver-ext-debian -t $username/hugo:latest .
-          echo "Docker image built and pushed successfully."
+
+          for tag in $MISSING_VERSIONS; do
+            ver=${tag#v}
+            echo "Building for version: $ver"
+            echo docker buildx build --build-arg HUGO_VERSION=$tag --platform=linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7 --push -t $username/hugo:$ver-ext-debian -t $username/hugo:$ver .
+            echo "Docker image built and pushed successfully for version $tag."
+          done
