@@ -1,22 +1,31 @@
-# docker-hugo
+# Hugo Docker Images
 
-[![Check Hugo Release & Publish to Docker Hub](https://github.com/leoli0605/docker-hugo/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/leoli0605/docker-hugo/actions/workflows/docker-publish.yml)
+![Hugo Logo](https://gohugo.io/images/hugo-logo-wide.svg)
 
-This repository provides an automated Docker image build for [Hugo](https://gohugo.io/), a popular static site generator. The image is multi-platform supported and is automatically pushed to Docker Hub.
+This Docker image contains the Hugo static site generator. We automatically build and publish Docker images for Hugo versions greater than `v0.115.4` using GitHub Actions.
 
-## Docker Image Versions
+## Features
 
-- For Hugo versions after `v0.115.4`, you can find the Docker image at [jafee201153/hugo](https://hub.docker.com/r/jafee201153/hugo).
-- For Hugo versions before `v0.111.3`, the Docker image is available at [klakegg/hugo](https://hub.docker.com/r/klakegg/hugo).
+- **Automated Builds**: Every day, our GitHub Actions workflow checks for new Hugo releases and builds Docker images for versions greater than `v0.115.4`.
+- **Multi-Architecture Support**: We build images for multiple architectures including `linux/amd64`, `linux/arm64`, `linux/arm/v6`, and `linux/arm/v7`.
+- **Extended Version**: Our images are built with the `extended` tag, providing SCSS/SASS support out of the box.
 
-## Build Duration
+## Usage
 
-The GitHub Action workflow typically takes approximately 2.5 hours to complete the entire process.
+To use the latest version of Hugo:
 
-## Additional Information
+```
+docker run --rm -it -v $(pwd):/src -p 1313:1313 jafee201153/hugo:latest
+```
 
-For more details about Hugo, please visit the [official Hugo website](https://gohugo.io/).
+To use a specific version of Hugo:
 
-## TODO
+```
+docker run --rm -it -v $(pwd):/src -p 1313:1313 jafee201153/hugo:DESIRED_VERSION
+```
 
-- [ ] Add [Overview](https://hub.docker.com/r/jafee201153/hugo) to this Docker Hub repo.
+Replace `DESIRED_VERSION` with the version of Hugo you want to use.
+
+## Support
+
+If you encounter any issues or have suggestions, please [open an issue](https://github.com/leoli0605/docker-hugo/issues) on our GitHub repository.
