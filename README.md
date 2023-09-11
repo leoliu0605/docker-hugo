@@ -1,3 +1,6 @@
+[![Check Hugo Release & Publish to Docker Hub](https://github.com/leoli0605/docker-hugo/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/leoli0605/docker-hugo/actions/workflows/docker-publish.yml)
+[![Update Docker Hub Description](https://github.com/leoli0605/docker-hugo/actions/workflows/dockerhub-description.yml/badge.svg)](https://github.com/leoli0605/docker-hugo/actions/workflows/dockerhub-description.yml)
+
 # Hugo Docker Images
 
 ![Hugo Logo](https://gohugo.io/images/hugo-logo-wide.svg)
