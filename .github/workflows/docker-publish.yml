@@ -31,7 +31,7 @@ jobs:
           echo "Existing tags on Docker Hub: $existing_tags"
           versions_to_build=""
           IFS=';' read -ra ADDR <<< "${{ steps.fetch-versions.outputs.hugo_versions }}"
-          for tag in "${ [@]}"; do
+          for tag in "${ADDR[@]}"; do
             if [[ "$tag" > "v0.115.4" && ! "$existing_tags" =~ "${tag#v}-ext-debian" ]]; then
               versions_to_build="$versions_to_build${versions_to_build:+;}$tag"
             fi
