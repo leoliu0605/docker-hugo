@@ -68,6 +68,6 @@ jobs:
           for tag in "${ADDR[@]}"; do
             ver=${tag#v}
             echo "Building for version: $ver"
-            docker buildx build --build-arg HUGO_VERSION=$tag --platform=linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7 --push -t $username/hugo:$ver-ext-debian -t $username/hugo:$ver .
+            docker buildx build --build-arg HUGO_VERSION=$tag --platform=linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7 --push -t $username/hugo:$ver-ext-debian -t $username/hugo:latest .
           done
           echo "Docker images built and pushed successfully."
