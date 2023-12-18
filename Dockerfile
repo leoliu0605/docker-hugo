@@ -1,4 +1,4 @@
-FROM golang:1.20.6-bookworm as builder
+FROM golang:latest as builder
 
 ARG HUGO_VERSION=latest
 
