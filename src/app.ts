@@ -1,6 +1,8 @@
 import axios from "axios";
 import { spawn } from "child_process";
 import * as dotenv from "dotenv";
+import * as fs from "fs";
+import * as semver from "semver";
 
 async function main() {
     dotenv.config();
@@ -16,10 +18,12 @@ async function main() {
     const tags = await getDockerTags(`${username}/hugo`);
     console.log("Docker tags:", tags);
 
+    let content = "";
+
     for (const version of versions) {
         const tag_ext_alpine = `${version.replace("v", "")}-ext-alpine`;
         const tag_ext_debian = `${version.replace("v", "")}-ext-debian`;
-        if (version > "v0.115.4") {
+        if (semver.gt(semver.coerce(version), '0.115.3')) {
             console.log(`Building hugo:${version}`);
             if (!tags.includes(tag_ext_alpine)) {
                 console.log(`-- Building Alpine image`);
@@ -67,12 +71,22 @@ async function main() {
                 console.log(script);
                 await cmd("bash", ["-c", script]);
             }
+
+            content =
+                `\n` +
+                `-   \`${version}\`\n` +
+                `    -   \`${tag_ext_alpine}\`, \`alpine\`, \`latest\`\n` +
+                `    -   \`${tag_ext_debian}\`, \`debian\`\n` +
+                `    ${content.replace(", \`alpine\`, \`latest\`", "").replace(", \`debian\`", "")}`;
+
             console.log(`Waiting 30 minutes...`);
             await new Promise(resolve => setTimeout(resolve, 30 * 60 * 1000));
         }
     }
+    console.log("Done building images");
 
-    console.log("Done");
+    await updateREADME(`${content}`);
+    console.log("Done updating README");
 }
 
 async function getHugoVersions(): Promise<string[]> {
@@ -127,6 +141,14 @@ function cmd(command: string, args: string[]): Promise<void> {
             }
         });
     });
+}
+
+async function updateREADME(content: string) {
+    let readme = fs.readFileSync("README.md", "utf8");
+    let before = readme.substring(0, readme.indexOf("<!-- TAGS_START -->") + "<!-- TAGS_START -->".length);
+    let after = readme.substring(readme.indexOf("<!-- TAGS_END -->"));
+    readme = before + "\n" + content + "\n" + after;
+    fs.writeFileSync("README.md", readme);
 }
 
 main();
