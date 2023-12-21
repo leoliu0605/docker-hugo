@@ -39,7 +39,8 @@ async function main() {
                 -f Dockerfile.alpine \\
                 --platform=linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7 \\
                 --build-arg HUGO_VERSION=${version} \\
-                --push -t $username/hugo:${tag_ext_alpine} .`;
+                -t $username/hugo:${tag_ext_alpine} -t $username/hugo:alpine . \\
+                --push`;
                 console.log(script);
                 await cmd("bash", ["-c", script]);
             }
@@ -61,7 +62,8 @@ async function main() {
                 -f Dockerfile.bookworm \\
                 --platform=linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7 \\
                 --build-arg HUGO_VERSION=${version} \\
-                --push -t $username/hugo:${tag_ext_debian} -t $username/hugo:latest .`;
+                -t $username/hugo:${tag_ext_debian} -t $username/hugo:debian -t $username/hugo:latest . \\
+                --push`;
                 console.log(script);
                 await cmd("bash", ["-c", script]);
             }
