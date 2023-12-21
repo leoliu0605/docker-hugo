@@ -17,11 +17,14 @@ async function main() {
     console.log("Docker tags:", tags);
 
     for (const version of versions) {
-        const tag = `${version.replace("v", "")}-ext-debian`;
-        if (!tags.includes(tag) && version > "v0.115.4") {
+        const tag_ext_alpine = `${version.replace("v", "")}-ext-alpine`;
+        const tag_ext_debian = `${version.replace("v", "")}-ext-debian`;
+        if (version > "v0.115.4") {
             console.log(`Building hugo:${version}`);
+            if (!tags.includes(tag_ext_alpine)) {
+                console.log(`-- Building Alpine image`);
 
-            const script = `
+                const script = `
                 #!/bin/bash
 
                 username=${username}
@@ -33,11 +36,35 @@ async function main() {
                 docker buildx use $builder
                 docker buildx inspect --bootstrap
                 docker buildx build \\
+                -f Dockerfile.alpine \\
                 --platform=linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7 \\
                 --build-arg HUGO_VERSION=${version} \\
-                --push -t $username/hugo:${tag} -t $username/hugo:latest .`;
-            console.log(script);
-            await cmd("bash", ["-c", script]);
+                --push -t $username/hugo:${tag_ext_alpine} .`;
+                console.log(script);
+                await cmd("bash", ["-c", script]);
+            }
+            if (!tags.includes(tag_ext_debian)) {
+                console.log(`-- Building Debian image`);
+
+                const script = `
+                #!/bin/bash
+
+                username=${username}
+                version=${version}
+                builder=builder
+                if ! docker buildx ls | grep -q $builder; then
+                    docker buildx create --name $builder
+                fi
+                docker buildx use $builder
+                docker buildx inspect --bootstrap
+                docker buildx build \\
+                -f Dockerfile.bookworm \\
+                --platform=linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7 \\
+                --build-arg HUGO_VERSION=${version} \\
+                --push -t $username/hugo:${tag_ext_debian} -t $username/hugo:latest .`;
+                console.log(script);
+                await cmd("bash", ["-c", script]);
+            }
             console.log(`Waiting 30 minutes...`);
             await new Promise(resolve => setTimeout(resolve, 30 * 60 * 1000));
         }

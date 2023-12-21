@@ -1,0 +1,13 @@
+FROM golang:alpine as builder
+
+ARG HUGO_VERSION=latest
+
+RUN apk update && \
+    apk add \
+        gcc \
+        g++ \
+        libc-dev
+RUN gcc --version
+RUN go version
+RUN CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo@$HUGO_VERSION
+RUN hugo version
