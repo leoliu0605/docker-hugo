@@ -30,6 +30,14 @@ jobs:
         env:
           USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
 
+      - name: Push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add README.md
+          git diff --cached --quiet || git commit -m "Update README.md"
+          git push origin main
+
       - name: update description
         if: success()
         uses: peter-evans/dockerhub-description@v2

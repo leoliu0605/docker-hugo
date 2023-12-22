@@ -15,7 +15,7 @@ async function main() {
     const versions = (await getHugoVersions()).reverse();
     console.log("Hugo versions:", versions);
 
-    const tags = await getDockerTags(`${username}/hugo`);
+    let tags = await getDockerTags(`${username}/hugo`);
     console.log("Docker tags:", tags);
 
     let content = "";
@@ -72,15 +72,21 @@ async function main() {
                 await cmd("bash", ["-c", script]);
             }
 
+            while (!tags.includes(tag_ext_alpine) || !tags.includes(tag_ext_debian)) {
+                await new Promise(resolve => setTimeout(resolve, 30 * 1000)); // wait 30 seconds
+                tags = await getDockerTags(`${username}/hugo`);
+            }
             content =
                 `\n` +
-                `-   \`${version}\`\n` +
-                `    -   \`${tag_ext_alpine}\`, \`alpine\`, \`latest\`\n` +
-                `    -   \`${tag_ext_debian}\`, \`debian\`\n` +
+                `-   \`${version}\`\n`
+            if (tags.includes(tag_ext_alpine)) {
+                content += `    -   \`${tag_ext_alpine}\`, \`alpine\`, \`latest\`\n`;
+            }
+            if (tags.includes(tag_ext_debian)) {
+                content += `    -   \`${tag_ext_debian}\`, \`debian\`\n`;
+            }
+            content +=
                 `    ${content.replace(", \`alpine\`, \`latest\`", "").replace(", \`debian\`", "")}`;
-
-            console.log(`Waiting 30 minutes...`);
-            await new Promise(resolve => setTimeout(resolve, 30 * 60 * 1000));
         }
     }
     console.log("Done building images");
