@@ -1,13 +1,17 @@
 FROM golang:alpine as builder
-
 ARG HUGO_VERSION=latest
-
 RUN apk update && \
-    apk add \
-        gcc \
-        g++ \
-        libc-dev
-RUN gcc --version
+    apk add --no-cache \
+    gcc \
+    g++ \
+    libc-dev
 RUN go version
 RUN CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo@$HUGO_VERSION
+
+FROM alpine:latest
+RUN apk update && \
+    apk add --no-cache \
+    libstdc++ \
+    libgcc
+COPY --from=builder /go/bin/hugo /usr/local/bin/hugo
 RUN hugo version

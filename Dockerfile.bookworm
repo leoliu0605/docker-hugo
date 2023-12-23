@@ -1,7 +1,14 @@
 FROM golang:bookworm as builder
-
 ARG HUGO_VERSION=latest
-
 RUN go version
 RUN CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo@$HUGO_VERSION
+
+FROM debian:bookworm-slim
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libc6 \
+    libgcc-s1 \
+    libstdc++6 \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /go/bin/hugo /usr/local/bin/hugo
 RUN hugo version

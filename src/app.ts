@@ -25,6 +25,7 @@ async function main() {
         const tag_ext_debian = `${version.replace("v", "")}-ext-debian`;
         if (semver.gt(semver.coerce(version), '0.115.3')) {
             console.log(`Building hugo:${version}`);
+
             if (!tags.includes(tag_ext_alpine)) {
                 console.log(`-- Building Alpine image`);
 
@@ -32,7 +33,6 @@ async function main() {
                 #!/bin/bash
 
                 username=${username}
-                version=${version}
                 builder=builder
                 if ! docker buildx ls | grep -q $builder; then
                     docker buildx create --name $builder
@@ -55,7 +55,6 @@ async function main() {
                 #!/bin/bash
 
                 username=${username}
-                version=${version}
                 builder=builder
                 if ! docker buildx ls | grep -q $builder; then
                     docker buildx create --name $builder
