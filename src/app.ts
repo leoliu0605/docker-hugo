@@ -75,16 +75,18 @@ async function main() {
                 await new Promise(resolve => setTimeout(resolve, 30 * 1000)); // wait 30 seconds
                 tags = await getDockerTags(`${username}/hugo`);
             }
-            content =
+
+            let text =
                 `\n` +
-                `-   \`${version}\`\n`
+                `-   \`${version}\`\n`;
             if (tags.includes(tag_ext_alpine)) {
-                content += `    -   \`${tag_ext_alpine}\`, \`alpine\`, \`latest\`\n`;
+                text += `    -   \`${tag_ext_alpine}\`, \`alpine\`, \`latest\`\n`;
             }
             if (tags.includes(tag_ext_debian)) {
-                content += `    -   \`${tag_ext_debian}\`, \`debian\`\n`;
+                text += `    -   \`${tag_ext_debian}\`, \`debian\`\n`;
             }
-            content +=
+            content =
+                `${text}` +
                 `    ${content.replace(", \`alpine\`, \`latest\`", "").replace(", \`debian\`", "")}`;
         }
     }
