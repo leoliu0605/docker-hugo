@@ -2,7 +2,7 @@
 
 # Hugo Docker Images
 
-![Hugo Logo](https://gohugo.io/images/hugo-logo-wide.svg)
+[![Hugo Logo](https://gohugo.io/images/hugo-logo-wide.svg)](https://github.com/gohugoio/hugo)
 
 This Docker image contains the Hugo static site generator. We automatically build and publish Docker images for Hugo versions greater than `v0.115.4` using GitHub Actions.
 
