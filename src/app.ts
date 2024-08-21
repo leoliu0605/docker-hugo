@@ -62,7 +62,7 @@ async function main() {
                 docker buildx use $builder
                 docker buildx inspect --bootstrap
                 docker buildx build \\
-                -f Dockerfile.bookworm \\
+                -f Dockerfile.debian \\
                 --platform=linux/amd64,linux/arm64,linux/arm/v7 \\
                 --build-arg HUGO_VERSION=${version} \\
                 -t $username/hugo:${tag_ext_debian} -t $username/hugo:debian . \\
