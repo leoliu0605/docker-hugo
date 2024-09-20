@@ -1,4 +1,6 @@
 [![hugo](https://github.com/leoli0605/docker-hugo/actions/workflows/publish.yml/badge.svg)](https://github.com/leoli0605/docker-hugo/actions/workflows/publish.yml)
+[![Docker Pulls](https://img.shields.io/docker/pulls/jafee201153/hugo.svg)](https://hub.docker.com/r/jafee201153/hugo/)
+[![Docker Stars](https://img.shields.io/docker/stars/jafee201153/hugo.svg)](https://hub.docker.com/r/jafee201153/hugo/)
 
 # Hugo Docker Images
 
