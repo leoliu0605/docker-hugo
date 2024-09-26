@@ -42,7 +42,7 @@ jobs:
 
       - name: update description
         if: success()
-        uses: peter-evans/dockerhub-description@v2
+        uses: peter-evans/dockerhub-description@v4
         env:
           USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         with:
