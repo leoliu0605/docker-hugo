@@ -18,9 +18,17 @@ This Docker image contains the Hugo static site generator. We automatically buil
 
 <!-- TAGS_START -->
 
+-   `v0.139.2`
+    -   `0.139.2-ext-alpine`, `alpine`, `latest`
+    -   `0.139.2-ext-debian`, `debian`
+    
+-   `v0.139.1`
+    -   `0.139.1-ext-alpine`
+    -   `0.139.1-ext-debian`
+    
 -   `v0.139.0`
-    -   `0.139.0-ext-alpine`, `alpine`, `latest`
-    -   `0.139.0-ext-debian`, `debian`
+    -   `0.139.0-ext-alpine`
+    -   `0.139.0-ext-debian`
     
 -   `v0.138.0`
     -   `0.138.0-ext-alpine`
@@ -129,14 +137,6 @@ This Docker image contains the Hugo static site generator. We automatically buil
 -   `v0.126.3`
     -   `0.126.3-ext-alpine`
     -   `0.126.3-ext-debian`
-    
--   `v0.126.2`
-    -   `0.126.2-ext-alpine`
-    -   `0.126.2-ext-debian`
-    
--   `v0.126.1`
-    -   `0.126.1-ext-alpine`
-    -   `0.126.1-ext-debian`
     
 <!-- TAGS_END -->
 
