@@ -10,6 +10,8 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      MEMORY: 4g
     permissions:
       contents: write
     steps:
