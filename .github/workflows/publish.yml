@@ -62,9 +62,16 @@ jobs:
         run: |
           git fetch origin main
           if [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ]; then
-            echo "No new commit was created, creating an empty commit to keep active"
-            git config --local user.email "action@github.com"
-            git config --local user.name "GitHub Action"
-            git commit --allow-empty -m "chore: keep workflow active"
-            git push origin main
+            LAST_COMMIT_DATE=$(git log -1 --format=%ct)
+            CURRENT_DATE=$(date +%s)
+            DAYS_SINCE_LAST_COMMIT=$(( (CURRENT_DATE - LAST_COMMIT_DATE) / 86400 ))
+            if [ "$DAYS_SINCE_LAST_COMMIT" -ge 30 ]; then
+              echo "No new commit was created and last commit was $DAYS_SINCE_LAST_COMMIT days ago, creating an empty commit to keep active"
+              git config --local user.email "action@github.com"
+              git config --local user.name "GitHub Action"
+              git commit --allow-empty -m "chore: keep workflow active"
+              git push origin main
+            else
+              echo "No new commit was created but last commit was only $DAYS_SINCE_LAST_COMMIT days ago, skipping empty commit"
+            fi
           fi
