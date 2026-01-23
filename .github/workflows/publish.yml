@@ -58,6 +58,3 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
           repository: ${{ env.USERNAME }}/hugo
 
-      - name: Keep workflow active
-        uses: entepotenz/keep-github-actions-alive-min-dependencies@v1
-
