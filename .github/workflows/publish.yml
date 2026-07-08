@@ -39,6 +39,7 @@ jobs:
           echo "Done"
         env:
           USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push changes
         run: |

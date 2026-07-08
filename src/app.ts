@@ -32,7 +32,6 @@ async function main() {
                 const script = `
                 #!/bin/bash
 
-                username=${username}
                 builder=builder
                 if ! docker buildx ls | grep -q $builder; then
                     docker buildx create --name $builder
@@ -42,11 +41,11 @@ async function main() {
                 docker buildx build \\
                 -f Dockerfile.alpine \\
                 --platform=linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7 \\
-                --build-arg HUGO_VERSION=${version} \\
-                -t $username/hugo:${tag_ext_alpine} -t $username/hugo:alpine -t $username/hugo:latest . \\
+                --build-arg HUGO_VERSION=$HUGO_VERSION \\
+                -t $USERNAME/hugo:$TAG_ALPINE -t $USERNAME/hugo:alpine -t $USERNAME/hugo:latest . \\
                 --push`;
                 console.log(script);
-                await cmd("bash", ["-c", script]);
+                await cmd("bash", ["-c", script], { USERNAME: username, HUGO_VERSION: version, TAG_ALPINE: tag_ext_alpine });
             }
             if (!tags.includes(tag_ext_debian)) {
                 console.log(`-- Building Debian image`);
@@ -54,7 +53,6 @@ async function main() {
                 const script = `
                 #!/bin/bash
 
-                username=${username}
                 builder=builder
                 if ! docker buildx ls | grep -q $builder; then
                     docker buildx create --name $builder
@@ -64,11 +62,11 @@ async function main() {
                 docker buildx build \\
                 -f Dockerfile.debian \\
                 --platform=linux/amd64,linux/arm64,linux/arm/v7 \\
-                --build-arg HUGO_VERSION=${version} \\
-                -t $username/hugo:${tag_ext_debian} -t $username/hugo:debian . \\
+                --build-arg HUGO_VERSION=$HUGO_VERSION \\
+                -t $USERNAME/hugo:$TAG_DEBIAN -t $USERNAME/hugo:debian . \\
                 --push`;
                 console.log(script);
-                await cmd("bash", ["-c", script]);
+                await cmd("bash", ["-c", script], { USERNAME: username, HUGO_VERSION: version, TAG_DEBIAN: tag_ext_debian });
             }
 
             while (!tags.includes(tag_ext_alpine) || !tags.includes(tag_ext_debian)) {
@@ -97,13 +95,23 @@ async function main() {
 }
 
 async function getHugoVersions(): Promise<string[]> {
-    const response = await axios.get("https://api.github.com/repos/gohugoio/hugo/tags");
-    if (response.status !== 200) {
-        console.error("Failed to get hugo versions");
+    try {
+        const token = process.env.GITHUB_TOKEN;
+        const headers: Record<string, string> = {};
+        if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
+        }
+        const response = await axios.get("https://api.github.com/repos/gohugoio/hugo/tags", { headers });
+        if (response.status !== 200) {
+            console.error("Failed to get hugo versions");
+            return [];
+        }
+        const tags = response.data;
+        return tags.map((tag: any) => tag.name);
+    } catch (error) {
+        console.error("Failed to get hugo versions:", error);
         return [];
     }
-    const tags = response.data;
-    return tags.map((tag: any) => tag.name);
 }
 
 async function getDockerTags(repo: string): Promise<string[]> {
@@ -128,19 +136,19 @@ async function getDockerTags(repo: string): Promise<string[]> {
     }
 }
 
-function cmd(command: string, args: string[]): Promise<void> {
+function cmd(command: string, args: string[], env?: Record<string, string>): Promise<void> {
     return new Promise((resolve, reject) => {
-        const process = spawn(command, args, { shell: true });
+        const child = spawn(command, args, { env: { ...process.env, ...env } });
 
-        process.stdout.on('data', (data) => {
+        child.stdout.on('data', (data) => {
             console.log(data.toString());
         });
 
-        process.stderr.on('data', (data) => {
+        child.stderr.on('data', (data) => {
             console.error(data.toString());
         });
 
-        process.on('close', (code) => {
+        child.on('close', (code) => {
             if (code === 0) {
                 resolve();
             } else {
@@ -158,4 +166,7 @@ async function updateREADME(content: string) {
     fs.writeFileSync("README.md", readme);
 }
 
-main();
+main().catch((error) => {
+    console.error("Fatal error:", error);
+    process.exit(1);
+});
