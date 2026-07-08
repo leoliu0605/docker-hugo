@@ -32,7 +32,6 @@ async function main() {
                 const script = `
                 #!/bin/bash
 
-                username=${username}
                 builder=builder
                 if ! docker buildx ls | grep -q $builder; then
                     docker buildx create --name $builder
@@ -43,10 +42,10 @@ async function main() {
                 -f Dockerfile.alpine \\
                 --platform=linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7 \\
                 --build-arg HUGO_VERSION=${version} \\
-                -t $username/hugo:${tag_ext_alpine} -t $username/hugo:alpine -t $username/hugo:latest . \\
+                -t $USERNAME/hugo:${tag_ext_alpine} -t $USERNAME/hugo:alpine -t $USERNAME/hugo:latest . \\
                 --push`;
                 console.log(script);
-                await cmd("bash", ["-c", script]);
+                await cmd("bash", ["-c", script], { USERNAME: username });
             }
             if (!tags.includes(tag_ext_debian)) {
                 console.log(`-- Building Debian image`);
@@ -54,7 +53,6 @@ async function main() {
                 const script = `
                 #!/bin/bash
 
-                username=${username}
                 builder=builder
                 if ! docker buildx ls | grep -q $builder; then
                     docker buildx create --name $builder
@@ -65,10 +63,10 @@ async function main() {
                 -f Dockerfile.debian \\
                 --platform=linux/amd64,linux/arm64,linux/arm/v7 \\
                 --build-arg HUGO_VERSION=${version} \\
-                -t $username/hugo:${tag_ext_debian} -t $username/hugo:debian . \\
+                -t $USERNAME/hugo:${tag_ext_debian} -t $USERNAME/hugo:debian . \\
                 --push`;
                 console.log(script);
-                await cmd("bash", ["-c", script]);
+                await cmd("bash", ["-c", script], { USERNAME: username });
             }
 
             while (!tags.includes(tag_ext_alpine) || !tags.includes(tag_ext_debian)) {
@@ -138,19 +136,19 @@ async function getDockerTags(repo: string): Promise<string[]> {
     }
 }
 
-function cmd(command: string, args: string[]): Promise<void> {
+function cmd(command: string, args: string[], env?: Record<string, string>): Promise<void> {
     return new Promise((resolve, reject) => {
-        const process = spawn(command, args, { shell: true });
+        const child = spawn(command, args, { env: { ...process.env, ...env } });
 
-        process.stdout.on('data', (data) => {
+        child.stdout.on('data', (data) => {
             console.log(data.toString());
         });
 
-        process.stderr.on('data', (data) => {
+        child.stderr.on('data', (data) => {
             console.error(data.toString());
         });
 
-        process.on('close', (code) => {
+        child.on('close', (code) => {
             if (code === 0) {
                 resolve();
             } else {
