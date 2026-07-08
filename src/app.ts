@@ -97,13 +97,23 @@ async function main() {
 }
 
 async function getHugoVersions(): Promise<string[]> {
-    const response = await axios.get("https://api.github.com/repos/gohugoio/hugo/tags");
-    if (response.status !== 200) {
-        console.error("Failed to get hugo versions");
+    try {
+        const token = process.env.GITHUB_TOKEN;
+        const headers: Record<string, string> = {};
+        if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
+        }
+        const response = await axios.get("https://api.github.com/repos/gohugoio/hugo/tags", { headers });
+        if (response.status !== 200) {
+            console.error("Failed to get hugo versions");
+            return [];
+        }
+        const tags = response.data;
+        return tags.map((tag: any) => tag.name);
+    } catch (error) {
+        console.error("Failed to get hugo versions:", error);
         return [];
     }
-    const tags = response.data;
-    return tags.map((tag: any) => tag.name);
 }
 
 async function getDockerTags(repo: string): Promise<string[]> {
@@ -158,4 +168,7 @@ async function updateREADME(content: string) {
     fs.writeFileSync("README.md", readme);
 }
 
-main();
+main().catch((error) => {
+    console.error("Fatal error:", error);
+    process.exit(1);
+});
