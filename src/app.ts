@@ -41,11 +41,11 @@ async function main() {
                 docker buildx build \\
                 -f Dockerfile.alpine \\
                 --platform=linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7 \\
-                --build-arg HUGO_VERSION=${version} \\
-                -t $USERNAME/hugo:${tag_ext_alpine} -t $USERNAME/hugo:alpine -t $USERNAME/hugo:latest . \\
+                --build-arg HUGO_VERSION=$HUGO_VERSION \\
+                -t $USERNAME/hugo:$TAG_ALPINE -t $USERNAME/hugo:alpine -t $USERNAME/hugo:latest . \\
                 --push`;
                 console.log(script);
-                await cmd("bash", ["-c", script], { USERNAME: username });
+                await cmd("bash", ["-c", script], { USERNAME: username, HUGO_VERSION: version, TAG_ALPINE: tag_ext_alpine });
             }
             if (!tags.includes(tag_ext_debian)) {
                 console.log(`-- Building Debian image`);
@@ -62,11 +62,11 @@ async function main() {
                 docker buildx build \\
                 -f Dockerfile.debian \\
                 --platform=linux/amd64,linux/arm64,linux/arm/v7 \\
-                --build-arg HUGO_VERSION=${version} \\
-                -t $USERNAME/hugo:${tag_ext_debian} -t $USERNAME/hugo:debian . \\
+                --build-arg HUGO_VERSION=$HUGO_VERSION \\
+                -t $USERNAME/hugo:$TAG_DEBIAN -t $USERNAME/hugo:debian . \\
                 --push`;
                 console.log(script);
-                await cmd("bash", ["-c", script], { USERNAME: username });
+                await cmd("bash", ["-c", script], { USERNAME: username, HUGO_VERSION: version, TAG_DEBIAN: tag_ext_debian });
             }
 
             while (!tags.includes(tag_ext_alpine) || !tags.includes(tag_ext_debian)) {
