@@ -42,6 +42,7 @@ async function main() {
                 -f Dockerfile.alpine \\
                 --platform=linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7 \\
                 --build-arg HUGO_VERSION=$HUGO_VERSION \\
+                --shm-size=2g \\
                 -t $USERNAME/hugo:$TAG_ALPINE -t $USERNAME/hugo:alpine -t $USERNAME/hugo:latest . \\
                 --push`;
                 console.log(script);

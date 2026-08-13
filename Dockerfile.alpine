@@ -1,11 +1,10 @@
 FROM golang:1.26-alpine AS builder
 ARG HUGO_VERSION=latest
-RUN apk update && \
-    apk add --no-cache \
-    gcc \
-    g++ \
-    musl-dev \
-    libc-dev
+RUN for i in 1 2 3; do \
+        apk update && \
+        apk add --no-cache gcc g++ musl-dev libc-dev && break || \
+        { echo "Attempt $i failed, retrying..."; [ $i -eq 3 ] && exit 1; }; \
+    done
 RUN go version
 RUN CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo@$HUGO_VERSION
 
